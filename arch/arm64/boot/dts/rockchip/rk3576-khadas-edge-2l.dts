@@ -31,6 +31,31 @@
 		};
 	};
 
+	leds: leds {
+		compatible = "gpio-leds";
+
+		blue_led: led-2 {
+			gpios = <&gpio2 RK_PC2 GPIO_ACTIVE_HIGH>;
+			label = "blue_led";
+			linux,default-trigger = "none";
+			default-state = "off";
+		};
+
+		green_led: led-1 {
+			gpios = <&gpio2 RK_PC0 GPIO_ACTIVE_HIGH>;
+			label = "green_led";
+			linux,default-trigger = "default_on";
+			default-state = "on";
+		};
+
+		red_led: led-0 {
+			gpios = <&gpio2 RK_PC6 GPIO_ACTIVE_HIGH>;
+			label = "red_led";
+			linux,default-trigger = "none";
+			default-state = "off";
+		};
+	};
+
 	vcc5v0_device: regulator-vcc5v0-device {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_device";
