@@ -71,6 +71,45 @@
 		};
 	};
 
+	sound {
+		compatible = "simple-audio-card";
+		pinctrl-names = "default";
+		pinctrl-0 = <&hp_det>;
+		simple-audio-card,name = "Khadas Edge2L ES8316";
+		simple-audio-card,aux-devs = <&spk_amp>;
+		simple-audio-card,format = "i2s";
+		simple-audio-card,hp-det-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_LOW>;
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,routing =
+			"Speaker Amplifier INL", "HPOL",
+			"Speaker Amplifier INR", "HPOR",
+			"Speaker", "Speaker Amplifier OUTL",
+			"Speaker", "Speaker Amplifier OUTR",
+			"Headphones", "HPOL",
+			"Headphones", "HPOR";
+		simple-audio-card,widgets =
+			"Headphone", "Headphones",
+			"Speaker", "Speaker";
+
+		simple-audio-card,cpu {
+			sound-dai = <&sai2>;
+		};
+
+		simple-audio-card,codec {
+			sound-dai = <&es8316>;
+			system-clock-frequency = <12288000>;
+		};
+	};
+
+	spk_amp: speaker-amplifier {
+		compatible = "simple-audio-amplifier";
+		enable-gpios = <&gpio3 RK_PA2 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&spk_ctl>;
+		sound-name-prefix = "Speaker Amplifier";
+		VCC-supply = <&vcc5v0_device>;
+	};
+
 	vcc5v0_device: regulator-vcc5v0-device {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc5v0_device";
@@ -604,6 +643,24 @@
 	};
 };
 
+&i2c6 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c6m2_xfer>;
+
+	es8316: audio-codec@10 {
+		compatible = "everest,es8316";
+		reg = <0x10>;
+		clocks = <&cru CLK_SAI2_MCLKOUT_TO_IO>;
+		clock-names = "mclk";
+		assigned-clocks = <&cru CLK_SAI2_MCLKOUT_TO_IO>;
+		assigned-clock-rates = <12288000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&sai2m0_mclk>;
+		#sound-dai-cells = <0>;
+	};
+};
+
 &pcie0 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie0_rst>;
@@ -629,6 +686,16 @@
 };
 
 &pinctrl {
+	audio {
+		hp_det: hp-det {
+			rockchip,pins = <2 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+
+		spk_ctl: spk-ctl {
+			rockchip,pins = <3 RK_PA2 RK_FUNC_GPIO &pcfg_pull_down>;
+		};
+	};
+
 	bluetooth {
 		bt_reg_on: bt-reg-on {
 			rockchip,pins = <4 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
@@ -670,6 +737,10 @@
 			rockchip,pins = <0 RK_PB0 RK_FUNC_GPIO &pcfg_pull_down>;
 		};
 	};
+};
+
+&sai2 {
+	status = "okay";
 };
 
 &saradc {
